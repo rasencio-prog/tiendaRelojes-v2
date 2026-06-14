@@ -1,0 +1,26 @@
+
+  GET|HEAD  / ......................................................................... tienda.index › TiendaController@index
+  GET|HEAD  admin/dashboard ............................................................. admin.dashboard › routes/web.php:50
+  GET|HEAD  admin/login ..................................................... admin.login › Auth\LoginController@mostrarLogin
+  POST      admin/login ....................................................... admin.login.post › Auth\LoginController@login
+  POST      admin/logout ......................................................... admin.logout › Auth\LoginController@logout
+  GET|HEAD  admin/productos .......................................... admin.productos.index › Admin\ProductoController@index
+  POST      admin/productos .......................................... admin.productos.store › Admin\ProductoController@store
+  GET|HEAD  admin/productos/crear .................................. admin.productos.create › Admin\ProductoController@create
+  PUT       admin/productos/{producto} ............................. admin.productos.update › Admin\ProductoController@update
+  DELETE    admin/productos/{producto} ........................... admin.productos.destroy › Admin\ProductoController@destroy
+  GET|HEAD  admin/productos/{producto}/editar .......................... admin.productos.edit › Admin\ProductoController@edit
+  PATCH     admin/productos/{producto}/toggle-activo .. admin.productos.toggle-activo › Admin\ProductoController@toggleActivo
+  POST      carrito/actualizar/{id} .......................................... carrito.actualizar › CartController@actualizar
+  POST      carrito/agregar/{id} ................................................... carrito.agregar › CartController@agregar
+  POST      carrito/eliminar/{id} ................................................ carrito.eliminar › CartController@eliminar
+  POST      carrito/toggle ........................................................... carrito.toggle › CartController@toggle
+  POST      carrito/vaciar ........................................................... carrito.vaciar › CartController@vaciar
+  POST      contacto ............................................................ contacto.enviar › TiendaController@contacto
+  GET|HEAD  storage/{path} storage.local › vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServiceProvider.php:…
+  PUT       storage/{path} storage.local.upload › vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServiceProvid…
+  GET|HEAD  up .................. vendor/laravel/framework/src/Illuminate/Foundation/Configuration/ApplicationBuilder.php:219
+  POST      vender-reloj ....................................................... vender.enviar › TiendaController@venderReloj
+
+                                                                                                          Showing [22] routes
+

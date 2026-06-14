@@ -1,0 +1,127 @@
+=== LARAVEL ===
+Laravel Framework 12.61.1
+
+=== PHP ===
+PHP 8.5.7 (cli) (built: Jun  2 2026 20:59:56) (NTS)
+Copyright (c) The PHP Group
+Built by Homebrew
+Zend Engine v4.5.7, Copyright (c) Zend Technologies
+    with Zend OPcache v8.5.7, Copyright (c), by Zend Technologies
+
+=== COMPOSER ===
+{
+    "name": "laravel/laravel",
+    "type": "project",
+    "description": "The Laravel Framework.",
+    "keywords": ["framework", "laravel"],
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^12.0",
+        "laravel/tinker": "^2.9"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "laravel/pint": "^1.13",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.1",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
+
+=== ROUTES ===
+
+  GET|HEAD  / ......................................................................... tienda.index › TiendaController@index
+  GET|HEAD  admin/dashboard ............................................................. admin.dashboard › routes/web.php:50
+  GET|HEAD  admin/login ..................................................... admin.login › Auth\LoginController@mostrarLogin
+  POST      admin/login ....................................................... admin.login.post › Auth\LoginController@login
+  POST      admin/logout ......................................................... admin.logout › Auth\LoginController@logout
+  GET|HEAD  admin/productos .......................................... admin.productos.index › Admin\ProductoController@index
+  POST      admin/productos .......................................... admin.productos.store › Admin\ProductoController@store
+  GET|HEAD  admin/productos/crear .................................. admin.productos.create › Admin\ProductoController@create
+  PUT       admin/productos/{producto} ............................. admin.productos.update › Admin\ProductoController@update
+  DELETE    admin/productos/{producto} ........................... admin.productos.destroy › Admin\ProductoController@destroy
+  GET|HEAD  admin/productos/{producto}/editar .......................... admin.productos.edit › Admin\ProductoController@edit
+  PATCH     admin/productos/{producto}/toggle-activo .. admin.productos.toggle-activo › Admin\ProductoController@toggleActivo
+  POST      carrito/actualizar/{id} .......................................... carrito.actualizar › CartController@actualizar
+  POST      carrito/agregar/{id} ................................................... carrito.agregar › CartController@agregar
+  POST      carrito/eliminar/{id} ................................................ carrito.eliminar › CartController@eliminar
+  POST      carrito/toggle ........................................................... carrito.toggle › CartController@toggle
+  POST      carrito/vaciar ........................................................... carrito.vaciar › CartController@vaciar
+  POST      contacto ............................................................ contacto.enviar › TiendaController@contacto
+  GET|HEAD  storage/{path} storage.local › vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServiceProvider.php:…
+  PUT       storage/{path} storage.local.upload › vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServiceProvid…
+  GET|HEAD  up .................. vendor/laravel/framework/src/Illuminate/Foundation/Configuration/ApplicationBuilder.php:219
+  POST      vender-reloj ....................................................... vender.enviar › TiendaController@venderReloj
+
+                                                                                                          Showing [22] routes
+
+
+=== CONTROLLERS ===
+app/Http/Controllers/Controller.php
+app/Http/Controllers/Auth/LoginController.php
+app/Http/Controllers/Admin/ProductoController.php
+app/Http/Controllers/TiendaController.php
+app/Http/Controllers/ProductController.php
+app/Http/Controllers/CartController.php
+
+=== MODELS ===
+app/Models/Producto.php
+app/Models/User.php
+app/Models/ProductoImagen.php
+
+=== VIEWS ===
+resources/views/auth/login.blade.php
+resources/views/admin/dashboard.blade.php
+resources/views/admin/layouts/admin.blade.php
+resources/views/admin/productos/index.blade.php
+resources/views/admin/productos/edit.blade.php
+resources/views/admin/productos/create.blade.php
+resources/views/shop.blade.php
+resources/views/layouts/app.blade.php
+resources/views/partials/productos-grid.blade.php
+
+=== MIDDLEWARE ===
+
+=== MIGRATIONS ===
+database/migrations/2026_06_05_000001_create_users_table.php
+database/migrations/2026_06_05_000002_create_productos_table.php
+database/migrations/2026_06_09_131546_create_producto_imagens_table.php

@@ -55,19 +55,42 @@
       <div class="product-grid">
         @forelse($productos as $producto)
           <div class="product-card-custom animate-fade-in">
+            @php $imgs = $producto->imagenes; $totalImgs = $imgs->count(); @endphp
             <div class="img-container-custom">
-              <img src="{{ $producto->url_imagen }}" alt="{{ $producto->nombre }}" class="img-custom" />
+              @if($totalImgs > 0)
+                @foreach($imgs as $idx => $img)
+                  <img src="{{ $img->url_imagen }}" alt="{{ $producto->nombre }}"
+                       class="carousel-slide"
+                       style="{{ $idx > 0 ? 'display:none;' : '' }}">
+                @endforeach
+              @else
+                <img src="{{ asset('assets/watch_submariner.png') }}" alt="{{ $producto->nombre }}" class="carousel-slide">
+              @endif
+              @if($totalImgs > 1)
+                <button class="carousel-btn carousel-prev" onclick="carouselNav(this,-1)" aria-label="Imagen anterior">&#8249;</button>
+                <button class="carousel-btn carousel-next" onclick="carouselNav(this,1)" aria-label="Imagen siguiente">&#8250;</button>
+                <div class="carousel-dots">
+                  @foreach($imgs as $idx => $img)
+                    <span class="carousel-dot {{ $idx === 0 ? 'active' : '' }}" onclick="carouselGoTo(this,{{ $idx }})"></span>
+                  @endforeach
+                </div>
+              @endif
               @if($producto->porcentaje_descuento > 0)
                 <span class="offer-badge-card">-{{ $producto->porcentaje_descuento }}% OFF</span>
-              @endif
-              @if($producto->stock <= 2 && $producto->stock > 0)
-                <span class="stock-badge">¡Últimas {{ $producto->stock }}!</span>
               @endif
             </div>
             <div class="card-content-custom">
               <span class="product-brand-custom">{{ $producto->marca }}</span>
               <h3 class="product-title-custom">{{ $producto->nombre }}</h3>
-              <p class="product-desc-custom">{{ Str::limit($producto->descripcion, 100) }}</p>
+              <p class="product-desc-custom">
+                {{ Str::limit($producto->descripcion, 100) }}
+                @if(strlen($producto->descripcion) > 100)
+                  <button class="btn-mas-detalle"
+                    onclick="abrirDetalle({{ $producto->id }}, '{{ addslashes($producto->nombre) }}', '{{ addslashes($producto->descripcion) }}')">
+                    más detalle
+                  </button>
+                @endif
+              </p>
               <div class="card-footer-custom">
                 <div class="price-block">
                   @if($producto->porcentaje_descuento > 0)
@@ -103,13 +126,39 @@
           <div class="offer-wrapper">
             <div class="offer-badge">-{{ $producto->porcentaje_descuento }}% OFF</div>
             <div class="product-card-custom animate-fade-in">
+              @php $imgs = $producto->imagenes; $totalImgs = $imgs->count(); @endphp
               <div class="img-container-custom">
-                <img src="{{ $producto->url_imagen }}" alt="{{ $producto->nombre }}" class="img-custom" />
+                @if($totalImgs > 0)
+                  @foreach($imgs as $idx => $img)
+                    <img src="{{ $img->url_imagen }}" alt="{{ $producto->nombre }}"
+                         class="carousel-slide"
+                         style="{{ $idx > 0 ? 'display:none;' : '' }}">
+                  @endforeach
+                @else
+                  <img src="{{ asset('assets/watch_submariner.png') }}" alt="{{ $producto->nombre }}" class="carousel-slide">
+                @endif
+                @if($totalImgs > 1)
+                  <button class="carousel-btn carousel-prev" onclick="carouselNav(this,-1)" aria-label="Imagen anterior">&#8249;</button>
+                  <button class="carousel-btn carousel-next" onclick="carouselNav(this,1)" aria-label="Imagen siguiente">&#8250;</button>
+                  <div class="carousel-dots">
+                    @foreach($imgs as $idx => $img)
+                      <span class="carousel-dot {{ $idx === 0 ? 'active' : '' }}" onclick="carouselGoTo(this,{{ $idx }})"></span>
+                    @endforeach
+                  </div>
+                @endif
               </div>
               <div class="card-content-custom">
                 <span class="product-brand-custom">{{ $producto->marca }}</span>
                 <h3 class="product-title-custom">{{ $producto->nombre }}</h3>
-                <p class="product-desc-custom">{{ Str::limit($producto->descripcion, 100) }}</p>
+                <p class="product-desc-custom">
+                  {{ Str::limit($producto->descripcion, 100) }}
+                  @if(strlen($producto->descripcion) > 100)
+                    <button class="btn-mas-detalle"
+                      onclick="abrirDetalle({{ $producto->id }}, '{{ addslashes($producto->nombre) }}', '{{ addslashes($producto->descripcion) }}')">
+                      más detalle
+                    </button>
+                  @endif
+                </p>
                 <div class="card-footer-custom">
                   <div class="price-block">
                     {{-- Precio original tachado --}}
@@ -182,18 +231,24 @@
         <div class="about-text-content">
           <h2 class="about-heading">Quiénes Somos</h2>
           <p class="about-paragraph">
-            En <strong style="color:#c5a059;">{{ config('tienda.nombre_tienda') }}</strong> nos especializamos en la alta relojería internacional.
-            Contamos con años de trayectoria asesorando a coleccionistas y entusiastas en la adquisición
-            y venta de piezas exclusivas de marcas de renombre mundial.
+            Rolejería.cl nace en 2023 impulsada por la pasión por la relojería clásica y contemporánea.
+            Nos especializamos en la compra, venta y consignación de relojes cuidadosamente seleccionados,
+            ofreciendo piezas de marcas reconocidas y modelos únicos para coleccionistas y entusiastas.
           </p>
           <p class="about-paragraph">
-            Nuestra misión es resguardar el valor del tiempo, ofreciendo una experiencia de compra
-            transparente, segura y totalmente personalizada para cada cliente.
-            Cada reloj en nuestro catálogo es verificado meticulosamente por expertos.
+            Nuestro compromiso es entregar confianza, transparencia y una atención personalizada,
+            ayudando a cada cliente a encontrar el reloj ideal o a vender su pieza con seguridad.
+          </p>
+          <p class="about-paragraph">
+            Más que vender relojes, compartimos la historia, la ingeniería y la pasión que hacen
+            de cada reloj una pieza especial.
+          </p>
+          <p class="about-paragraph" style="color:#c5a059; font-style:italic; margin-top:1.25rem;">
+            Rolejería.cl — Colección y pasión por la relojería.
           </p>
         </div>
         <div class="about-image-placeholder">
-          <span class="about-placeholder-text">LUXE Heritage</span>
+          <span class="about-placeholder-text">Rolejería<br>Relojes de Lujo</span>
         </div>
       </div>
     </div>
@@ -233,24 +288,21 @@
 
         <div class="contact-info-container">
           <h3 class="contact-subheading">Nuestra Tienda</h3>
-          <p class="contact-info-text"><strong>Dirección:</strong> {{ config('tienda.direccion') }}</p>
           <p class="contact-info-text"><strong>Teléfono:</strong> {{ config('tienda.telefono_contacto') }}</p>
           <p class="contact-info-text"><strong>Email:</strong> {{ config('tienda.correo_contacto') }}</p>
-          <p class="contact-info-text"><strong>Horario:</strong> Lunes a Viernes de 10:00 a 19:00 hrs.</p>
-          <div class="map-placeholder-custom">
-            <iframe
-              src="https://www.google.com/maps?q={{ urlencode(config('tienda.direccion')) }}&output=embed"
-              width="100%" height="100%" style="border:0;"
-              allowfullscreen="" loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              title="Mapa de ubicación {{ config('tienda.nombre_tienda') }}"
-            ></iframe>
-          </div>
         </div>
 
       </div>
     </div>
   </section>
+
+  {{-- ──────────── Modal Descripción ──────────── --}}
+  <div id="detalle-overlay" class="detalle-overlay" onclick="cerrarDetalle()"></div>
+  <div id="detalle-modal" class="detalle-modal">
+    <button class="detalle-close" onclick="cerrarDetalle()" aria-label="Cerrar">✕</button>
+    <h3 id="detalle-nombre" class="detalle-titulo"></h3>
+    <p id="detalle-descripcion" class="detalle-texto"></p>
+  </div>
 
   {{-- ──────────── Carrito (Overlay + Drawer) ──────────── --}}
   <div class="cart-overlay-custom" id="cart-overlay"
@@ -342,6 +394,41 @@
 
 @section('scripts')
 <script>
+function carouselNav(btn, dir) {
+  const container = btn.closest('.img-container-custom');
+  const slides = container.querySelectorAll('.carousel-slide');
+  const dots   = container.querySelectorAll('.carousel-dot');
+  let current  = Array.from(slides).findIndex(s => s.style.display !== 'none');
+  slides[current].style.display = 'none';
+  dots[current].classList.remove('active');
+  current = (current + dir + slides.length) % slides.length;
+  slides[current].style.display = 'block';
+  dots[current].classList.add('active');
+}
+
+
+function abrirDetalle(id, nombre, descripcion) {
+  document.getElementById('detalle-nombre').textContent = nombre;
+  document.getElementById('detalle-descripcion').textContent = descripcion;
+  document.getElementById('detalle-overlay').classList.add('active');
+  document.getElementById('detalle-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarDetalle() {
+  document.getElementById('detalle-overlay').classList.remove('active');
+  document.getElementById('detalle-modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function carouselGoTo(dot, idx) {
+  const container = dot.closest('.img-container-custom');
+  const slides = container.querySelectorAll('.carousel-slide');
+  const dots   = container.querySelectorAll('.carousel-dot');
+  slides.forEach((s, i) => { s.style.display = i === idx ? 'block' : 'none'; });
+  dots.forEach((d, i) => { d.classList.toggle('active', i === idx); });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   const toggleBtn = document.getElementById('cart-toggle-btn');
   const closeBtn  = document.getElementById('cart-close-btn');

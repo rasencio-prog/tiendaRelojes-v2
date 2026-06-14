@@ -182,9 +182,20 @@
     }
     .image-upload-area:hover { border-color: var(--accent); }
     .image-upload-area input[type="file"] { display: none; }
-    .image-preview { max-width: 150px; max-height: 150px; border-radius: 4px; margin-top: 1rem; object-fit: cover; }
+    .image-preview { max-width: 120px; max-height: 120px; border-radius: 4px; object-fit: cover; }
     .upload-icon { font-size: 2rem; color: var(--muted); }
     .upload-text { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; }
+    .image-previews-container { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+    .image-preview-wrapper { position: relative; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: inline-block; }
+    .img-remove-btn {
+      position: absolute; top: 4px; right: 4px;
+      background: rgba(231,76,60,0.9); color: #fff;
+      border: none; border-radius: 50%;
+      width: 22px; height: 22px; font-size: 11px;
+      cursor: pointer; line-height: 1; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .img-remove-btn:hover { background: #e74c3c; }
 
     /* ── Pagination ──────────────────────── */
     .pagination { display: flex; gap: 0.5rem; align-items: center; justify-content: center; margin-top: 1.5rem; }
@@ -201,7 +212,7 @@
   {{-- ── Sidebar ── --}}
   <aside class="admin-sidebar">
     <div class="sidebar-brand">
-      LUXE
+      {{ config('tienda.nombre_tienda') }}
       <small>Administración</small>
     </div>
 

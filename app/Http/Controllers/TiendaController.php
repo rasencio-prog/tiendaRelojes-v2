@@ -22,11 +22,8 @@ class TiendaController extends Controller
      */
     public function index()
     {
-        // Todos los productos activos (catálogo completo)
-        $productos = Producto::activos()->orderBy('nombre')->get();
-
-        // Ofertas reales: productos activos con descuento aplicado
-        $ofertas = Producto::activos()->enOferta()->get();
+        $productos = Producto::activos()->with('imagenes')->orderBy('nombre')->get();
+        $ofertas   = Producto::activos()->enOferta()->with('imagenes')->get();
 
         return view('shop', compact('productos', 'ofertas'));
     }

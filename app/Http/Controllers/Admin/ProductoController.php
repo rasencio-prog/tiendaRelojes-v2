@@ -53,21 +53,28 @@ class ProductoController extends Controller
             'precio'               => ['required', 'numeric', 'min:0'],
             'porcentaje_descuento' => ['required', 'integer', 'min:0', 'max:100'],
             'stock'                => ['required', 'integer', 'min:0'],
-            'imagen'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
+            'imagenes'             => ['nullable', 'array', 'max:5'],
+            'imagenes.*'           => ['image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'destacado'            => ['boolean'],
             'activo'               => ['boolean'],
         ], $this->mensajesValidacion());
-
-        // Procesar imagen si se subió
-        if ($request->hasFile('imagen')) {
-            $datos['imagen'] = $this->subirImagen($request->file('imagen'));
-        }
 
         // Valores por defecto para checkboxes
         $datos['destacado'] = $request->boolean('destacado');
         $datos['activo']    = $request->boolean('activo', true);
 
-        Producto::create($datos);
+        $producto = Producto::create($datos);
+
+        // Procesar imágenes si se subieron
+        if ($request->hasFile('imagenes')) {
+            foreach ($request->file('imagenes') as $orden => $imagen) {
+                $rutaImagen = $this->subirImagen($imagen);
+                $producto->imagenes()->create([
+                    'ruta_imagen' => $rutaImagen,
+                    'orden'       => $orden,
+                ]);
+            }
+        }
 
         return redirect()->route('admin.productos.index')
                          ->with('exito', '¡Producto "' . $datos['nombre'] . '" agregado exitosamente al catálogo!');
@@ -98,18 +105,32 @@ class ProductoController extends Controller
             'precio'               => ['required', 'numeric', 'min:0'],
             'porcentaje_descuento' => ['required', 'integer', 'min:0', 'max:100'],
             'stock'                => ['required', 'integer', 'min:0'],
-            'imagen'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
+            'imagenes'             => ['nullable', 'array', 'max:5'],
+            'imagenes.*'           => ['image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'imagenes_existentes'  => ['nullable', 'array'],
+            'imagenes_existentes.*' => ['exists:producto_imagenes,id'],
             'destacado'            => ['boolean'],
             'activo'               => ['boolean'],
         ], $this->mensajesValidacion());
 
-        // Procesar nueva imagen si se subió
-        if ($request->hasFile('imagen')) {
-            // Eliminar imagen anterior del Storage
-            if ($producto->imagen) {
-                Storage::disk('public')->delete($producto->imagen);
+        // Eliminar imágenes existentes que no estén en 'imagenes_existentes'
+        $imagenesExistentesIds = $request->input('imagenes_existentes', []);
+        foreach ($producto->imagenes as $imagen) {
+            if (!in_array($imagen->id, $imagenesExistentesIds)) {
+                Storage::disk('public')->delete($imagen->ruta_imagen);
+                $imagen->delete();
             }
-            $datos['imagen'] = $this->subirImagen($request->file('imagen'));
+        }
+
+        // Procesar nuevas imágenes si se subieron
+        if ($request->hasFile('imagenes')) {
+            foreach ($request->file('imagenes') as $orden => $imagen) {
+                $rutaImagen = $this->subirImagen($imagen);
+                $producto->imagenes()->create([
+                    'ruta_imagen' => $rutaImagen,
+                    'orden'       => $producto->imagenes()->count() + $orden, // Append new images
+                ]);
+            }
         }
 
         // Valores por defecto para checkboxes
@@ -129,9 +150,10 @@ class ProductoController extends Controller
     {
         $nombre = $producto->nombre;
 
-        // Eliminar imagen del Storage si existe
-        if ($producto->imagen) {
-            Storage::disk('public')->delete($producto->imagen);
+        // Eliminar todas las imágenes asociadas del Storage
+        foreach ($producto->imagenes as $imagen) {
+            Storage::disk('public')->delete($imagen->ruta_imagen);
+            $imagen->delete(); // Eliminar el registro de la BD
         }
 
         $producto->delete();
@@ -161,20 +183,81 @@ class ProductoController extends Controller
     // ─────────────────────────────────────────────
 
     /**
-     * Sube una imagen al Storage de Laravel en la carpeta 'productos'.
+     * Sube una imagen al Storage con marca de agua incrustada mediante GD.
      * Retorna la ruta relativa almacenada en la BD (ej: productos/nombre.jpg).
      */
     private function subirImagen($archivo): string
     {
-        // Generar nombre único para evitar colisiones
-        $extension  = $archivo->getClientOriginalExtension();
-        $nombreBase = Str::slug(pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME));
+        $extension   = strtolower($archivo->getClientOriginalExtension());
+        $nombreBase  = Str::slug(pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME));
         $nombreFinal = time() . '_' . $nombreBase . '.' . $extension;
+        $carpeta     = storage_path('app/public/productos');
+        $rutaFinal   = $carpeta . '/' . $nombreFinal;
 
-        // Guardar en storage/app/public/productos
-        $archivo->storeAs('productos', $nombreFinal, 'public');
+        if (!is_dir($carpeta)) {
+            mkdir($carpeta, 0755, true);
+        }
+
+        $tmpPath = $archivo->getRealPath();
+
+        $img = match($extension) {
+            'jpg', 'jpeg' => imagecreatefromjpeg($tmpPath),
+            'png'         => imagecreatefrompng($tmpPath),
+            'webp'        => imagecreatefromwebp($tmpPath),
+            default       => null,
+        };
+
+        if ($img) {
+            imagealphablending($img, true);
+            $this->agregarMarcaAgua($img);
+
+            match($extension) {
+                'jpg', 'jpeg' => imagejpeg($img, $rutaFinal, 90),
+                'png'         => imagepng($img, $rutaFinal),
+                'webp'        => imagewebp($img, $rutaFinal, 90),
+                default       => null,
+            };
+        } else {
+            $archivo->storeAs('productos', $nombreFinal, 'public');
+        }
 
         return 'productos/' . $nombreFinal;
+    }
+
+    /**
+     * Incrusta la marca de agua "Rolejeria.cl" diagonal y centrada en la imagen.
+     */
+    private function agregarMarcaAgua($img): void
+    {
+        $texto    = 'Rolejeria.cl';
+        $fontPath = '/Library/Fonts/Arial Unicode.ttf';
+        $w        = imagesx($img);
+        $h        = imagesy($img);
+        $angulo   = -30;
+        $fontSize = max(14, (int)($w * 0.06));
+
+        if (file_exists($fontPath)) {
+            $bbox = imagettfbbox($fontSize, $angulo, $fontPath, $texto);
+            // Centrar el texto en la imagen
+            $cx = ($bbox[0] + $bbox[4]) / 2;
+            $cy = ($bbox[1] + $bbox[5]) / 2;
+            $x  = (int)($w / 2 - $cx);
+            $y  = (int)($h / 2 - $cy);
+
+            // Sombra sutil oscura
+            $sombra = imagecolorallocatealpha($img, 0, 0, 0, 90);
+            imagettftext($img, $fontSize, $angulo, $x + 2, $y + 2, $sombra, $fontPath, $texto);
+
+            // Texto blanco semitransparente (alpha 0=opaco, 127=transparente en GD)
+            $color = imagecolorallocatealpha($img, 255, 255, 255, 60);
+            imagettftext($img, $fontSize, $angulo, $x, $y, $color, $fontPath, $texto);
+        } else {
+            // Fallback sin fuente TTF
+            $color = imagecolorallocatealpha($img, 255, 255, 255, 60);
+            $fw = imagefontwidth(5) * strlen($texto);
+            $fh = imagefontheight(5);
+            imagestring($img, 5, (int)(($w - $fw) / 2), (int)(($h - $fh) / 2), $texto, $color);
+        }
     }
 
     /**
@@ -216,6 +299,11 @@ class ProductoController extends Controller
             'imagen.image'             => 'El archivo debe ser una imagen.',
             'imagen.mimes'             => 'La imagen debe ser JPG, PNG o WebP.',
             'imagen.max'               => 'La imagen no puede superar los 3MB.',
+            'imagenes.max'             => 'No puedes subir más de 5 imágenes por producto.',
+            'imagenes.*.image'         => 'Cada archivo debe ser una imagen.',
+            'imagenes.*.mimes'         => 'Cada imagen debe ser JPG, PNG o WebP.',
+            'imagenes.*.max'           => 'Cada imagen no puede superar los 3MB.',
+            'imagenes_existentes.*.exists' => 'Una de las imágenes existentes seleccionadas no es válida.',
         ];
     }
 }

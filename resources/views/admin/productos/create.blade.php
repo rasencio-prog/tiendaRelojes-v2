@@ -95,19 +95,23 @@
             @error('stock')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
-          {{-- Imagen --}}
-          <div class="form-group">
-            <label class="form-label" for="imagen">Imagen del Reloj</label>
-            <label class="image-upload-area" for="imagen">
-              <input id="imagen" type="file" name="imagen" accept="image/jpeg,image/png,image/webp"
-                onchange="previewImage(this)">
-              <div class="upload-icon">📷</div>
-              <div class="upload-text">Haz clic para seleccionar una imagen<br>
-                <small>JPG, PNG o WebP — máx. 3MB</small>
-              </div>
-              <img id="img-preview" class="image-preview" style="display:none;" alt="Vista previa">
+          {{-- Imágenes --}}
+          <div class="form-group full">
+            <label class="form-label">
+              Imágenes del Reloj
+              <span id="img-counter" style="font-weight:400; color:#888; font-size:0.8rem; margin-left:0.4rem;">0 / 5 seleccionadas</span>
             </label>
-            @error('imagen')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            {{-- Inputs de archivo ocultos se inyectan aquí al seleccionar --}}
+            <div id="file-inputs-container"></div>
+            <button type="button" id="add-img-btn" onclick="agregarImagen()"
+              style="width:100%; padding:1.5rem; border:2px dashed #2a2a2a; border-radius:8px;
+                     background:#0d0d0d; color:#888; font-size:0.9rem; cursor:pointer;
+                     transition:border-color .2s;">
+              📷 &nbsp;Seleccionar imagen &nbsp;<small style="display:block; margin-top:0.3rem; font-size:0.78rem;">JPG, PNG o WebP — máx. 2MB — hasta 5 en total</small>
+            </button>
+            <div id="image-previews" class="image-previews-container"></div>
+            @error('imagenes')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+            @error('imagenes.*')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
           </div>
 
           {{-- Descripción (full width) --}}
@@ -117,7 +121,11 @@
               class="form-control {{ $errors->has('descripcion') ? 'is-invalid' : '' }}"
               rows="4"
               placeholder="Describe el reloj: movimiento, materiales, certificaciones, historia..."
+              oninput="actualizarContador('descripcion','contador-desc')"
               required>{{ old('descripcion') }}</textarea>
+            <div style="text-align:right; font-size:0.78rem; color:#888; margin-top:0.3rem;">
+              <span id="contador-desc">0</span> de 100
+            </div>
             @error('descripcion')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
@@ -151,17 +159,82 @@
 </div>
 
 <script>
-function previewImage(input) {
-  const preview = document.getElementById('img-preview');
-  if (input.files && input.files[0]) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      preview.src = e.target.result;
-      preview.style.display = 'block';
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
+function actualizarContador(textareaId, spanId) {
+  const len = document.getElementById(textareaId).value.length;
+  const span = document.getElementById(spanId);
+  span.textContent = len;
+  span.style.color = len > 100 ? '#e74c3c' : '#888';
 }
+
+const MAX_IMGS = 5;
+let imgCount = 0;
+
+function agregarImagen() {
+  if (imgCount >= MAX_IMGS) return;
+
+  const input = document.createElement('input');
+  input.type    = 'file';
+  input.name    = 'imagenes[]';
+  input.accept  = 'image/jpeg,image/png,image/webp';
+  input.style.display = 'none';
+
+  input.addEventListener('change', function () {
+    if (!this.files || !this.files[0]) {
+      this.remove();
+      return;
+    }
+    imgCount++;
+    actualizarBoton();
+    mostrarPreview(this.files[0], this);
+  });
+
+  document.getElementById('file-inputs-container').appendChild(input);
+  input.click();
+}
+
+function mostrarPreview(file, inputEl) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'image-preview-wrapper';
+
+    const img = document.createElement('img');
+    img.src = e.target.result;
+    img.className = 'image-preview';
+    img.alt = file.name;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = '✕';
+    btn.className = 'img-remove-btn';
+    btn.onclick = () => {
+      inputEl.remove();
+      wrapper.remove();
+      imgCount--;
+      actualizarBoton();
+    };
+
+    wrapper.appendChild(img);
+    wrapper.appendChild(btn);
+    document.getElementById('image-previews').appendChild(wrapper);
+  };
+  reader.readAsDataURL(file);
+}
+
+function actualizarBoton() {
+  document.getElementById('img-counter').textContent = imgCount + ' / ' + MAX_IMGS + ' seleccionadas';
+  const btn = document.getElementById('add-img-btn');
+  btn.disabled = imgCount >= MAX_IMGS;
+  btn.style.opacity = imgCount >= MAX_IMGS ? '0.5' : '1';
+  btn.style.cursor  = imgCount >= MAX_IMGS ? 'not-allowed' : 'pointer';
+}
+
+document.getElementById('add-img-btn').addEventListener('mouseenter', function () {
+  if (!this.disabled) this.style.borderColor = '#c5a059';
+});
+document.getElementById('add-img-btn').addEventListener('mouseleave', function () {
+  this.style.borderColor = '#2a2a2a';
+});
 </script>
 
 @endsection

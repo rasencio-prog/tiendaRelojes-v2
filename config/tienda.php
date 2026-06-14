@@ -11,9 +11,9 @@ return [
     |
     */
 
-    'nombre_tienda'      => env('TIENDA_NOMBRE', 'LUXE - Relojes de Lujo'),
+    'nombre_tienda'      => env('TIENDA_NOMBRE', 'Rolejería.cl'),
 
-    'correo_contacto'    => env('TIENDA_EMAIL', 'contacto@luxe.cl'),
+    'correo_contacto'    => env('TIENDA_EMAIL', 'contacto@rolejeria.cl'),
 
     'telefono_contacto'  => env('TIENDA_TELEFONO', '+56 9 1234 5678'),
 

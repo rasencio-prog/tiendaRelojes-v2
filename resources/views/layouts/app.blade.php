@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
+  <link rel="icon" type="image/png" href="{{ asset('assets/logo.png') }}" />
+  <link rel="shortcut icon" type="image/png" href="{{ asset('assets/logo.png') }}" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Descubre nuestra colección exclusiva de relojes de alta gama en {{ config('tienda.nombre_tienda') }}." />
   <title>@yield('title', config('tienda.nombre_tienda'))</title>

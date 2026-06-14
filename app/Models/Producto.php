@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany; // Added this line
 
 /**
  * Modelo Producto
@@ -20,9 +21,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int         $porcentaje_descuento
  * @property int         $stock
  * @property string      $categoria
- * @property string|null $imagen
  * @property bool        $destacado
  * @property bool        $activo
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProductoImagen> $imagenes
+ * @property-read string $url_imagen
+ * @property-read \Illuminate\Support\Collection<string> $imagenes_url
  */
 class Producto extends Model
 {
@@ -45,7 +48,6 @@ class Producto extends Model
         'porcentaje_descuento',
         'stock',
         'categoria',
-        'imagen',
         'destacado',
         'activo',
     ];
@@ -60,6 +62,18 @@ class Producto extends Model
         'destacado'            => 'boolean',
         'activo'               => 'boolean',
     ];
+
+    // ─────────────────────────────────────────────
+    // Relationships
+    // ─────────────────────────────────────────────
+
+    /**
+     * Get the images for the product.
+     */
+    public function imagenes(): HasMany
+    {
+        return $this->hasMany(ProductoImagen::class)->orderBy('orden');
+    }
 
     // ─────────────────────────────────────────────
     // Scopes
@@ -105,15 +119,23 @@ class Producto extends Model
     }
 
     /**
-     * Retorna la URL pública de la imagen del producto.
-     * Si no tiene imagen, devuelve una imagen por defecto.
+     * Retorna la URL pública de la imagen principal del producto.
+     * Si no tiene imágenes, devuelve una imagen por defecto.
      */
     public function getUrlImagenAttribute(): string
     {
-        if ($this->imagen) {
-            return asset('storage/' . $this->imagen);
+        if ($this->imagenes->isNotEmpty()) {
+            return $this->imagenes->first()->url_imagen;
         }
         return asset('assets/watch_submariner.png');
+    }
+
+    /**
+     * Retorna una colección de URLs públicas de todas las imágenes del producto.
+     */
+    public function getImagenesUrlAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->imagenes->map(fn ($imagen) => $imagen->url_imagen);
     }
 
     /**
