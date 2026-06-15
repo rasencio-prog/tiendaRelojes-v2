@@ -84,7 +84,8 @@
       margin-bottom: 0.4rem;
     }
     input[type="email"],
-    input[type="password"] {
+    input[type="password"],
+    input.password-input {
       width: 100%;
       padding: 0.8rem 1rem;
       background: var(--color-bg);
@@ -97,6 +98,27 @@
       transition: border-color 0.2s;
     }
     input:focus { border-color: var(--color-accent); }
+    .password-wrapper {
+      position: relative;
+    }
+    .password-wrapper input {
+      padding-right: 3rem;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-muted);
+      padding: 0;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    .toggle-password:hover { color: var(--color-accent); }
     .checkbox-row {
       display: flex;
       align-items: center;
@@ -160,7 +182,7 @@
   <div class="login-container">
 
     <div class="brand">
-      <div class="brand-logo">LUXE</div>
+      <div class="brand-logo">rojeleria.cl</div>
       <div class="brand-sub">Panel de Administración</div>
     </div>
 
@@ -198,13 +220,24 @@
 
         <div class="field">
           <label for="password">Contraseña</label>
-          <input
-            id="password"
-            type="password"
-            name="password"
-            autocomplete="current-password"
-            required
-          />
+          <div class="password-wrapper">
+            <input
+              id="password"
+              type="password"
+              name="password"
+              class="password-input"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="toggle-password" onclick="togglePassword()" aria-label="Mostrar/ocultar contraseña">
+              <svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg id="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="checkbox-row">
@@ -221,5 +254,21 @@
     <a href="{{ route('tienda.index') }}" class="back-link">← Volver a la tienda</a>
 
   </div>
+  <script>
+    function togglePassword() {
+      const input = document.getElementById('password');
+      const eyeOn  = document.getElementById('icon-eye');
+      const eyeOff = document.getElementById('icon-eye-off');
+      if (input.type === 'password') {
+        input.type = 'text';
+        eyeOn.style.display  = 'none';
+        eyeOff.style.display = 'block';
+      } else {
+        input.type = 'password';
+        eyeOn.style.display  = 'block';
+        eyeOff.style.display = 'none';
+      }
+    }
+  </script>
 </body>
 </html>
