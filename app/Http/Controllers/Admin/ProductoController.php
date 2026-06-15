@@ -191,7 +191,7 @@ class ProductoController extends Controller
         $extension   = strtolower($archivo->getClientOriginalExtension());
         $nombreBase  = Str::slug(pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME));
         $nombreFinal = time() . '_' . $nombreBase . '.' . $extension;
-        $carpeta     = storage_path('app/public/productos');
+        $carpeta     = public_path('storage/productos');
         $rutaFinal   = $carpeta . '/' . $nombreFinal;
 
         if (!is_dir($carpeta)) {
